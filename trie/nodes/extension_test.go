@@ -1,7 +1,7 @@
 package nodes
 
 import (
-	"github.com/Aleksao998/Merkle-Patricia-Trie/core/trie/nibble"
+	"github.com/Aleksao998/Merkle-Patricia-Trie/trie/nibble"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

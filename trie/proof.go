@@ -2,14 +2,14 @@ package trie
 
 import (
 	"fmt"
-	"github.com/Aleksao998/Merkle-Patricia-Trie/core/storage"
-	"github.com/Aleksao998/Merkle-Patricia-Trie/core/storage/mpt"
-	"github.com/Aleksao998/Merkle-Patricia-Trie/core/trie/nibble"
-	"github.com/Aleksao998/Merkle-Patricia-Trie/core/trie/nodes"
+	"github.com/Aleksao998/Merkle-Patricia-Trie/storage"
+	"github.com/Aleksao998/Merkle-Patricia-Trie/storage/mpt"
+	"github.com/Aleksao998/Merkle-Patricia-Trie/trie/nibble"
+	nodes2 "github.com/Aleksao998/Merkle-Patricia-Trie/trie/nodes"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
-func (t *Trie) GenerateProof(root nodes.Node, key []byte) (storage.Storage, error) {
+func (t *Trie) GenerateProof(root nodes2.Node, key []byte) (storage.Storage, error) {
 	currentNode := root
 	nibblePath := nibble.FromBytes(key)
 	db := mpt.NewMPTMemoryStorage()
@@ -21,7 +21,7 @@ func (t *Trie) GenerateProof(root nodes.Node, key []byte) (storage.Storage, erro
 			t.storeNode(db, currentNode)
 			return db, errKeyNotFound
 
-		case *nodes.LeafNode:
+		case *nodes2.LeafNode:
 			t.storeNode(db, node)
 			if nibble.Equal(node.Path, nibblePath) {
 				// Key found in trie
@@ -30,7 +30,7 @@ func (t *Trie) GenerateProof(root nodes.Node, key []byte) (storage.Storage, erro
 			// Path mismatch
 			return db, errKeyNotFound
 
-		case *nodes.BranchNode:
+		case *nodes2.BranchNode:
 			t.storeNode(db, node)
 			if len(nibblePath) == 0 {
 				_, found := node.GetValue()
@@ -44,7 +44,7 @@ func (t *Trie) GenerateProof(root nodes.Node, key []byte) (storage.Storage, erro
 			nibblePath = nibblePath[1:]
 			continue
 
-		case *nodes.ExtensionNode:
+		case *nodes2.ExtensionNode:
 			t.storeNode(db, node)
 			matchLen := nibble.CommonPrefixLength(node.Path, nibblePath)
 			if matchLen < len(node.Path) {
@@ -53,7 +53,7 @@ func (t *Trie) GenerateProof(root nodes.Node, key []byte) (storage.Storage, erro
 			nibblePath = nibblePath[matchLen:]
 			currentNode = node.Node
 			continue
-		case *nodes.HashNode:
+		case *nodes2.HashNode:
 			actualNode, err := t.DecodeNode(node.Hash)
 			if err != nil {
 				return db, err
@@ -69,7 +69,7 @@ func (t *Trie) GenerateProof(root nodes.Node, key []byte) (storage.Storage, erro
 	return db, fmt.Errorf("Key not found in trie")
 }
 
-func (t *Trie) storeNode(db storage.Storage, node nodes.Node) {
+func (t *Trie) storeNode(db storage.Storage, node nodes2.Node) {
 	rawNode := t.NodeRaw(node)
 	encoded, err := rlp.EncodeToBytes(rawNode)
 	if err != nil {

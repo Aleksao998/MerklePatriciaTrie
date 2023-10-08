@@ -1,13 +1,13 @@
 package trie
 
 import (
-	"github.com/Aleksao998/Merkle-Patricia-Trie/core/trie/crypto"
-	"github.com/Aleksao998/Merkle-Patricia-Trie/core/trie/nibble"
-	"github.com/Aleksao998/Merkle-Patricia-Trie/core/trie/nodes"
+	"github.com/Aleksao998/Merkle-Patricia-Trie/trie/crypto"
+	"github.com/Aleksao998/Merkle-Patricia-Trie/trie/nibble"
+	nodes2 "github.com/Aleksao998/Merkle-Patricia-Trie/trie/nodes"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
-func (t *Trie) NodeHash(node nodes.Node) []byte {
+func (t *Trie) NodeHash(node nodes2.Node) []byte {
 	rlp, err := rlp.EncodeToBytes(t.NodeRaw(node))
 	if err != nil {
 		panic(err)
@@ -15,16 +15,16 @@ func (t *Trie) NodeHash(node nodes.Node) []byte {
 	return crypto.Keccak256(rlp)
 }
 
-func (t *Trie) NodeRaw(node nodes.Node) interface{} {
+func (t *Trie) NodeRaw(node nodes2.Node) interface{} {
 	switch n := node.(type) {
 	case nil:
 		return []byte{}
-	case *nodes.LeafNode:
+	case *nodes2.LeafNode:
 		return []interface{}{
 			nibble.ToBytes(nibble.CompactEncoding(n.Path, true)),
 			n.Value,
 		}
-	case *nodes.ExtensionNode:
+	case *nodes2.ExtensionNode:
 		nextData := t.NodeRaw(n.Node)
 		encodedNextData, _ := rlp.EncodeToBytes(nextData)
 		if len(encodedNextData) >= 32 {
@@ -34,7 +34,7 @@ func (t *Trie) NodeRaw(node nodes.Node) interface{} {
 			nibble.ToBytes(nibble.CompactEncoding(n.Path, false)),
 			nextData,
 		}
-	case *nodes.BranchNode:
+	case *nodes2.BranchNode:
 		var childHashes [16]interface{}
 		for i, child := range n.Children {
 			if child != nil {
@@ -50,7 +50,7 @@ func (t *Trie) NodeRaw(node nodes.Node) interface{} {
 			}
 		}
 		return append(childHashes[:], n.Value)
-	case *nodes.HashNode:
+	case *nodes2.HashNode:
 		actualNode, err := t.DecodeNode(n.Hash)
 		if err != nil {
 			panic(err)

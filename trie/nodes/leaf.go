@@ -1,6 +1,8 @@
 package nodes
 
-import "github.com/Aleksao998/Merkle-Patricia-Trie/core/trie/nibble"
+import (
+	"github.com/Aleksao998/Merkle-Patricia-Trie/trie/nibble"
+)
 
 type LeafNode struct {
 	Path  []nibble.Nibble

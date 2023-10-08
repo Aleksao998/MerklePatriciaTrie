@@ -1,6 +1,8 @@
 package nodes
 
-import "github.com/Aleksao998/Merkle-Patricia-Trie/core/trie/nibble"
+import (
+	"github.com/Aleksao998/Merkle-Patricia-Trie/trie/nibble"
+)
 
 type ExtensionNode struct {
 	Path  []nibble.Nibble

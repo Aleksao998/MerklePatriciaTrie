@@ -1,7 +1,7 @@
 package trie
 
 import (
-	"github.com/Aleksao998/Merkle-Patricia-Trie/core/storage/mockStorage"
+	"github.com/Aleksao998/Merkle-Patricia-Trie/storage/mockStorage"
 	"github.com/stretchr/testify/require"
 	"strconv"
 	"sync"

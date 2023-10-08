@@ -2,29 +2,29 @@ package trie
 
 import (
 	"fmt"
-	"github.com/Aleksao998/Merkle-Patricia-Trie/core/trie/nibble"
-	"github.com/Aleksao998/Merkle-Patricia-Trie/core/trie/nodes"
+	"github.com/Aleksao998/Merkle-Patricia-Trie/trie/nibble"
+	nodes2 "github.com/Aleksao998/Merkle-Patricia-Trie/trie/nodes"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
 const rootHashKey = "rootHash"
 
-func (t *Trie) commit(node nodes.Node) ([]byte, error) {
+func (t *Trie) commit(node nodes2.Node) ([]byte, error) {
 	switch n := node.(type) {
-	case *nodes.LeafNode:
+	case *nodes2.LeafNode:
 		return t.handleLeafNode(n)
-	case *nodes.ExtensionNode:
+	case *nodes2.ExtensionNode:
 		return t.handleExtensionNode(n)
-	case *nodes.BranchNode:
+	case *nodes2.BranchNode:
 		return t.handleBranchNode(n)
-	case *nodes.HashNode:
+	case *nodes2.HashNode:
 		return n.Hash, nil
 	default:
 		panic("Unknown node type")
 	}
 }
 
-func (t *Trie) handleLeafNode(n *nodes.LeafNode) ([]byte, error) {
+func (t *Trie) handleLeafNode(n *nodes2.LeafNode) ([]byte, error) {
 	raw := t.NodeRaw(n)
 	encoded, err := rlp.EncodeToBytes(raw)
 	if err != nil {
@@ -39,14 +39,14 @@ func (t *Trie) handleLeafNode(n *nodes.LeafNode) ([]byte, error) {
 	return hash, nil
 }
 
-func (t *Trie) handleExtensionNode(n *nodes.ExtensionNode) ([]byte, error) {
+func (t *Trie) handleExtensionNode(n *nodes2.ExtensionNode) ([]byte, error) {
 	childHash, err := t.commit(n.Node)
 	if err != nil {
 		return nil, err
 	}
 
 	// replace the node with its hash node
-	n.Node = nodes.NewHashNode(childHash)
+	n.Node = nodes2.NewHashNode(childHash)
 
 	raw := t.NodeRaw(n)
 	encoded, err := rlp.EncodeToBytes(raw)
@@ -62,14 +62,14 @@ func (t *Trie) handleExtensionNode(n *nodes.ExtensionNode) ([]byte, error) {
 	return hash, nil
 }
 
-func (t *Trie) handleBranchNode(n *nodes.BranchNode) ([]byte, error) {
+func (t *Trie) handleBranchNode(n *nodes2.BranchNode) ([]byte, error) {
 	for index, child := range n.Children {
 		if child != nil {
 			childHash, err := t.commit(child)
 			if err != nil {
 				return nil, err
 			}
-			n.Children[index] = nodes.NewHashNode(childHash)
+			n.Children[index] = nodes2.NewHashNode(childHash)
 		}
 	}
 
@@ -87,7 +87,7 @@ func (t *Trie) handleBranchNode(n *nodes.BranchNode) ([]byte, error) {
 	return hash, nil
 }
 
-func (t *Trie) DecodeNode(hash []byte) (nodes.Node, error) {
+func (t *Trie) DecodeNode(hash []byte) (nodes2.Node, error) {
 	data, err := t.storage.Get(hash)
 	if err != nil {
 		return nil, err
@@ -101,7 +101,7 @@ func (t *Trie) DecodeNode(hash []byte) (nodes.Node, error) {
 	return t.reconstructNode(raw)
 }
 
-func (t *Trie) reconstructNode(raw []interface{}) (nodes.Node, error) {
+func (t *Trie) reconstructNode(raw []interface{}) (nodes2.Node, error) {
 	switch len(raw) {
 	case 2: // Could be LeafNode or ExtensionNode
 		path := nibble.FromBytes(raw[0].([]byte))
@@ -109,7 +109,7 @@ func (t *Trie) reconstructNode(raw []interface{}) (nodes.Node, error) {
 		path = nibble.RemoveCompactEncoding(path)
 
 		if isLeaf {
-			return &nodes.LeafNode{
+			return &nodes2.LeafNode{
 				Path:  path,
 				Value: raw[1].([]byte),
 				Dirty: false,
@@ -122,13 +122,13 @@ func (t *Trie) reconstructNode(raw []interface{}) (nodes.Node, error) {
 			return nil, err
 		}
 
-		return &nodes.ExtensionNode{
+		return &nodes2.ExtensionNode{
 			Path: path,
 			Node: child,
 		}, nil
 
 	case 17: // BranchNode
-		branch := &nodes.BranchNode{Dirty: false}
+		branch := &nodes2.BranchNode{Dirty: false}
 		for i := 0; i < 16; i++ {
 			child, err := t.decodeChild(raw[i])
 			if err != nil {
@@ -144,11 +144,11 @@ func (t *Trie) reconstructNode(raw []interface{}) (nodes.Node, error) {
 	}
 }
 
-func (t *Trie) decodeChild(data interface{}) (nodes.Node, error) {
+func (t *Trie) decodeChild(data interface{}) (nodes2.Node, error) {
 	switch v := data.(type) {
 	case []byte:
 		if len(v) == 32 { // hash length
-			return &nodes.HashNode{Hash: v}, nil
+			return &nodes2.HashNode{Hash: v}, nil
 		}
 		return nil, nil
 	case []interface{}:

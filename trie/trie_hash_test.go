@@ -2,7 +2,7 @@ package trie
 
 import (
 	"bytes"
-	"github.com/Aleksao998/Merkle-Patricia-Trie/core/storage/mockStorage"
+	"github.com/Aleksao998/Merkle-Patricia-Trie/storage/mockStorage"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"testing"

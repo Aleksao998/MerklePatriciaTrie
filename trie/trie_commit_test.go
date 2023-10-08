@@ -1,7 +1,7 @@
 package trie
 
 import (
-	"github.com/Aleksao998/Merkle-Patricia-Trie/core/storage/mpt"
+	"github.com/Aleksao998/Merkle-Patricia-Trie/storage/mpt"
 	"github.com/ethereum/go-ethereum/common"
 	ethereumTrie "github.com/ethereum/go-ethereum/trie"
 	"github.com/stretchr/testify/assert"
