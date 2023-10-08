@@ -16,6 +16,7 @@ func TestNewExtension_Basic(t *testing.T) {
 
 	assert.Equal(t, path, extNode.Path, "The paths should be equal")
 	assert.Equal(t, leaf, extNode.Node, "The nodes should be equal")
+	assert.True(t, leaf.Dirty, "The values should be equal")
 }
 
 // TestNewExtension_EmptyPath tests the creation of an ExtensionNode with an empty path.

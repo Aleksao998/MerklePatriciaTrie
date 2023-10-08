@@ -1,7 +1,6 @@
 package trie
 
 import (
-	"fmt"
 	"github.com/Aleksao998/Merkle-Patricia-Trie/storage"
 	"github.com/Aleksao998/Merkle-Patricia-Trie/storage/mpt"
 	"github.com/Aleksao998/Merkle-Patricia-Trie/trie/nibble"
@@ -48,7 +47,7 @@ func (t *Trie) GenerateProof(root nodes2.Node, key []byte) (storage.Storage, err
 			t.storeNode(db, node)
 			matchLen := nibble.CommonPrefixLength(node.Path, nibblePath)
 			if matchLen < len(node.Path) {
-				return db, fmt.Errorf("Key not found in trie")
+				return db, errKeyNotFound
 			}
 			nibblePath = nibblePath[matchLen:]
 			currentNode = node.Node
@@ -66,11 +65,11 @@ func (t *Trie) GenerateProof(root nodes2.Node, key []byte) (storage.Storage, err
 		}
 	}
 
-	return db, fmt.Errorf("Key not found in trie")
+	return db, errKeyNotFound
 }
 
 func (t *Trie) storeNode(db storage.Storage, node nodes2.Node) {
-	rawNode := t.NodeRaw(node)
+	rawNode := t.NodeRaw(node, false)
 	encoded, err := rlp.EncodeToBytes(rawNode)
 	if err != nil {
 		panic(err)

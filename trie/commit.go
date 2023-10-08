@@ -25,7 +25,7 @@ func (t *Trie) commit(node nodes2.Node) ([]byte, error) {
 }
 
 func (t *Trie) handleLeafNode(n *nodes2.LeafNode) ([]byte, error) {
-	raw := t.NodeRaw(n)
+	raw := t.NodeRaw(n, false)
 	encoded, err := rlp.EncodeToBytes(raw)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func (t *Trie) handleExtensionNode(n *nodes2.ExtensionNode) ([]byte, error) {
 	// replace the node with its hash node
 	n.Node = nodes2.NewHashNode(childHash)
 
-	raw := t.NodeRaw(n)
+	raw := t.NodeRaw(n, false)
 	encoded, err := rlp.EncodeToBytes(raw)
 	if err != nil {
 		return nil, err
@@ -73,7 +73,7 @@ func (t *Trie) handleBranchNode(n *nodes2.BranchNode) ([]byte, error) {
 		}
 	}
 
-	raw := t.NodeRaw(n)
+	raw := t.NodeRaw(n, false)
 	encoded, err := rlp.EncodeToBytes(raw)
 	if err != nil {
 		return nil, err
@@ -151,8 +151,6 @@ func (t *Trie) decodeChild(data interface{}) (nodes2.Node, error) {
 			return &nodes2.HashNode{Hash: v}, nil
 		}
 		return nil, nil
-	case []interface{}:
-		return t.reconstructNode(v)
 	default:
 		return nil, fmt.Errorf("Unexpected child data type")
 	}

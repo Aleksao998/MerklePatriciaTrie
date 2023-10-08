@@ -17,8 +17,3 @@ func NewLeafNode(path []nibble.Nibble, value []byte) *LeafNode {
 		Dirty: true,
 	}
 }
-
-// IsDirty returns if the node was changed from last commit
-func (l *LeafNode) IsDirty() bool {
-	return l.Dirty
-}

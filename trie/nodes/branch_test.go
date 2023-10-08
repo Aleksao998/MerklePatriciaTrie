@@ -12,8 +12,12 @@ func TestNewBranchNode_Basic(t *testing.T) {
 	t.Parallel()
 
 	branch := NewBranchNode()
+
+	value, exists := branch.GetValue()
+
 	require.NotNil(t, branch, "Branch node should not be nil")
-	assert.Empty(t, branch.Value, "New branch node should not have value")
+	assert.False(t, exists, "New branch node should not have value")
+	assert.Nil(t, value, "New branch node should not have value")
 	assert.Equal(t, 0, branch.ChildCount(), "New branch node should not have children")
 }
 

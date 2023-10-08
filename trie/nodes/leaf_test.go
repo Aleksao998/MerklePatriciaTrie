@@ -18,6 +18,7 @@ func TestNewLeafNode_Basic(t *testing.T) {
 
 	assert.Equal(t, path, leaf.Path, "The paths should be equal")
 	assert.Equal(t, value, leaf.Value, "The values should be equal")
+	assert.True(t, leaf.Dirty, "The values should be equal")
 }
 
 // TestNewLeafNode_Empty tests the creation of a LeafNode with an empty path and value.

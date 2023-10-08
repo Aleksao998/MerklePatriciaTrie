@@ -17,8 +17,3 @@ func NewExtension(path []nibble.Nibble, node Node) *ExtensionNode {
 		Dirty: true,
 	}
 }
-
-// IsDirty returns if the node was changed from last commit
-func (e *ExtensionNode) IsDirty() bool {
-	return e.Dirty
-}

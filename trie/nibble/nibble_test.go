@@ -17,11 +17,11 @@ func TestFromBytes(t *testing.T) {
 		{"Byte array", []byte{0xAB, 0xCD}, []Nibble{0xA, 0xB, 0xC, 0xD}},
 		{"Single item in byte array", []byte{0x12}, []Nibble{0x1, 0x2}},
 		{"Empty byte array", []byte{}, []Nibble{}},
+		{"Byte with leading zeros", []byte{0x01, 0x05}, []Nibble{0x0, 0x1, 0x0, 0x5}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
 
 			nibbles := FromBytes(tt.bytes)
 			for i, nibble := range nibbles {
@@ -44,11 +44,11 @@ func TestCommonPrefixLength(t *testing.T) {
 		{"Matching nibbles", []Nibble{0xA, 0xB, 0xC, 0xD}, []Nibble{0xA, 0xB, 0xC}, 3},
 		{"Mismatch at start", []Nibble{0x1, 0x2, 0x3}, []Nibble{0x4, 0x5, 0x6}, 0},
 		{"Empty slice", []Nibble{}, []Nibble{0x7, 0x8, 0x9}, 0},
+		{"First nibble array longer", []Nibble{0xA, 0xB, 0xC, 0xD}, []Nibble{0xA, 0xB}, 2},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
 
 			length := CommonPrefixLength(tt.node1, tt.node2)
 			assert.Equal(t, tt.expectedLength, length)
@@ -71,11 +71,12 @@ func TestEqual(t *testing.T) {
 		{"Mismatch at start", []Nibble{0x1, 0x2, 0x3}, []Nibble{0x4, 0x5, 0x6}, false},
 		{"Empty slice vs non-empty", []Nibble{}, []Nibble{0x7, 0x8, 0x9}, false},
 		{"Both empty slices", []Nibble{}, []Nibble{}, true},
+		{"Length mismatch", []Nibble{0xA, 0xB}, []Nibble{0xA, 0xB, 0xC}, false},
+		{"Mismatch in middle", []Nibble{0xA, 0xB, 0xC}, []Nibble{0xA, 0x1, 0xC}, false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
 
 			result := Equal(tt.node1, tt.node2)
 			assert.Equal(t, tt.expected, result)
@@ -97,11 +98,14 @@ func TestCompactEncoding(t *testing.T) {
 		{"Leaf odd length", []Nibble{1, 2, 3}, true, []Nibble{3, 1, 2, 3}},
 		{"Extension even length", []Nibble{1, 2, 3, 4}, false, []Nibble{0, 0, 1, 2, 3, 4}},
 		{"Extension odd length", []Nibble{1, 2, 3}, false, []Nibble{1, 1, 2, 3}},
+		{"Leaf node with even path length", []Nibble{1, 2, 3, 4}, true, []Nibble{2, 0, 1, 2, 3, 4}},
+		{"Extension node with even path length", []Nibble{1, 2, 3, 4}, false, []Nibble{0, 0, 1, 2, 3, 4}},
+		{"Leaf node with even path length", []Nibble{0xA, 0xB, 0xC, 0xD}, true, []Nibble{2, 0, 0xA, 0xB, 0xC, 0xD}},
+		{"Extension node with odd path length", []Nibble{0xB}, false, []Nibble{1, 0xB}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
 
 			result := CompactEncoding(tt.ns, tt.isLeafNode)
 			assert.Equal(t, tt.expected, result)
@@ -119,13 +123,12 @@ func TestToBytes(t *testing.T) {
 		expected []byte
 	}{
 		{"Convert nibbles to bytes", []Nibble{0xA, 0xB, 0xC, 0xD}, []byte{0xAB, 0xCD}},
-		{"Odd length nibbles", []Nibble{0xA, 0xB, 0xC}, nil}, // This should panic since your ToBytes doesn't handle odd length
 		{"Empty nibbles", []Nibble{}, []byte{}},
+		{"Nibbles with leading zeros", []Nibble{0x0, 0x1, 0x0, 0x5}, []byte{0x01, 0x05}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
 
 			result := ToBytes(tt.ns)
 			assert.Equal(t, tt.expected, result)
@@ -151,7 +154,6 @@ func TestIsLeaf(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
 
 			result := IsLeaf(tt.ns)
 			assert.Equal(t, tt.expected, result)
@@ -172,11 +174,15 @@ func TestRemoveCompactEncoding(t *testing.T) {
 		{"Leaf with odd path", []Nibble{3, 1, 2, 3}, []Nibble{1, 2, 3}},
 		{"Extension with even path", []Nibble{0, 0, 1, 2, 3, 4}, []Nibble{1, 2, 3, 4}},
 		{"Extension with odd path", []Nibble{1, 1, 2, 3}, []Nibble{1, 2, 3}},
+		{"Empty encoded path", []Nibble{}, []Nibble{}},
+		{"Encoded path with prefix 0", []Nibble{0, 0, 1, 2, 3}, []Nibble{1, 2, 3}},
+		{"Empty encoded path", []Nibble{}, []Nibble{}},
+		{"Encoded path with prefix 1", []Nibble{1, 0xA, 0xB}, []Nibble{0xA, 0xB}},
+		{"Encoded path with prefix 3", []Nibble{3, 0xA, 0xB, 0xC}, []Nibble{0xA, 0xB, 0xC}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
 
 			result := RemoveCompactEncoding(tt.ns)
 			assert.Equal(t, tt.expected, result)

@@ -66,8 +66,3 @@ func (b *BranchNode) ClearValue() {
 	b.Dirty = true
 	b.Value = nil
 }
-
-// IsDirty returns if the node was changed from last commit
-func (b *BranchNode) IsDirty() bool {
-	return b.Dirty
-}
