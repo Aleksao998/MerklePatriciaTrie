@@ -1,10 +1,11 @@
 package nodes
 
 import (
+	"testing"
+
 	"github.com/Aleksao998/Merkle-Patricia-Trie/trie/nibble"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 // TestNewBranchNode_Basic tests the basic creation of a BranchNode.

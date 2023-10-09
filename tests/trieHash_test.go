@@ -2,11 +2,12 @@ package tests
 
 import (
 	"encoding/json"
+	"os"
+	"testing"
+
 	"github.com/Aleksao998/Merkle-Patricia-Trie/storage/mpt"
 	"github.com/Aleksao998/Merkle-Patricia-Trie/trie"
 	"github.com/ethereum/go-ethereum/common"
-	"os"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -45,11 +46,14 @@ func loadExamplesFromJSON(path string) ([]Example, error) {
 	defer file.Close()
 
 	var examples []Example
+
 	decoder := json.NewDecoder(file)
+
 	err = decoder.Decode(&examples)
 	if err != nil {
 		return nil, err
 	}
+
 	return examples, nil
 }
 

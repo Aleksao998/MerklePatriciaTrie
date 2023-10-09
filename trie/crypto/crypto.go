@@ -1,8 +1,9 @@
 package crypto
 
 import (
-	"golang.org/x/crypto/sha3"
 	"log"
+
+	"golang.org/x/crypto/sha3"
 )
 
 // Keccak256 calculates and returns the Keccak256 hash of the input data

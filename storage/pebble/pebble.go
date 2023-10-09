@@ -1,6 +1,8 @@
 package pebble
 
 import (
+	"errors"
+
 	"github.com/cockroachdb/pebble"
 )
 
@@ -23,13 +25,17 @@ func NewStorage(path string) (*Storage, error) {
 // Has retrieves if a key is present in the key-value data store.
 func (p *Storage) Has(key []byte) (bool, error) {
 	_, closer, err := p.db.Get(key)
-	if err == pebble.ErrNotFound {
+
+	if errors.Is(err, pebble.ErrNotFound) {
 		return false, nil
 	}
+
 	if err != nil {
 		return false, err
 	}
+
 	closer.Close()
+
 	return true, nil
 }
 

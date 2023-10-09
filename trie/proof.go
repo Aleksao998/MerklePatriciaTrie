@@ -18,10 +18,12 @@ func (t *Trie) GenerateProof(root nodes2.Node, key []byte) (storage.Storage, err
 		case nil:
 			// If node is nil, then the path does not exist in the trie
 			t.storeNode(db, currentNode)
+
 			return db, errKeyNotFound
 
 		case *nodes2.LeafNode:
 			t.storeNode(db, node)
+
 			if nibble.Equal(node.Path, nibblePath) {
 				// Key found in trie
 				return db, nil
@@ -31,34 +33,43 @@ func (t *Trie) GenerateProof(root nodes2.Node, key []byte) (storage.Storage, err
 
 		case *nodes2.BranchNode:
 			t.storeNode(db, node)
+
 			if len(nibblePath) == 0 {
 				_, found := node.GetValue()
 				if found {
 					return db, nil
 				}
+
 				return db, errKeyNotFound
 			}
 			// Move to the next node in the branch
 			currentNode = node.Children[nibblePath[0]]
 			nibblePath = nibblePath[1:]
+
 			continue
 
 		case *nodes2.ExtensionNode:
 			t.storeNode(db, node)
+
 			matchLen := nibble.CommonPrefixLength(node.Path, nibblePath)
 			if matchLen < len(node.Path) {
 				return db, errKeyNotFound
 			}
+
 			nibblePath = nibblePath[matchLen:]
 			currentNode = node.Node
+
 			continue
 		case *nodes2.HashNode:
 			actualNode, err := t.DecodeNode(node.Hash)
 			if err != nil {
 				return db, err
 			}
+
 			currentNode = actualNode
+
 			t.storeNode(db, currentNode)
+
 			continue
 		default:
 			panic("Unexpected node type encountered while traversing the trie")
@@ -70,9 +81,11 @@ func (t *Trie) GenerateProof(root nodes2.Node, key []byte) (storage.Storage, err
 
 func (t *Trie) storeNode(db storage.Storage, node nodes2.Node) {
 	rawNode := t.NodeRaw(node, false)
+
 	encoded, err := rlp.EncodeToBytes(rawNode)
 	if err != nil {
 		panic(err)
 	}
+
 	db.Put(t.NodeHash(node), encoded)
 }

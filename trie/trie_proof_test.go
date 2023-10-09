@@ -1,11 +1,12 @@
 package trie
 
 import (
-	"github.com/Aleksao998/Merkle-Patricia-Trie/storage/mockStorage"
+	"testing"
+
+	mockstorage "github.com/Aleksao998/Merkle-Patricia-Trie/storage/mockStorage"
 	"github.com/ethereum/go-ethereum/common"
 	ethereumTrie "github.com/ethereum/go-ethereum/trie"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 // TestProofVerification tests the MPT's proof generation and verification mechanism
@@ -14,7 +15,7 @@ import (
 func TestProofVerification(t *testing.T) {
 	t.Parallel()
 
-	db := &mockStorage.MockStorage{}
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 
 	keys := [][]byte{
@@ -34,12 +35,15 @@ func TestProofVerification(t *testing.T) {
 	proof, err := trie.Proof(keyToProof)
 
 	assert.Nil(t, err, "Failed to generate proof")
+
 	hashByte := common.BytesToHash(trie.Hash())
 
 	value, err := ethereumTrie.VerifyProof(hashByte, keyToProof, proof)
 
 	assert.Nil(t, err, "Proof verification failed")
+
 	expectedValue, _ := trie.Get(keyToProof)
+
 	assert.Equal(t, expectedValue, value, "Mismatch in expected and retrieved value")
 }
 
@@ -49,13 +53,15 @@ func TestProofVerification(t *testing.T) {
 func TestProofVerificationForNonExistentKey(t *testing.T) {
 	t.Parallel()
 
-	db := &mockStorage.MockStorage{}
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 
 	key := []byte("neverExists")
 
 	proof, err := trie.Proof(key)
+
 	assert.Error(t, err)
+
 	hashByte := common.BytesToHash(trie.Hash())
 
 	_, err = ethereumTrie.VerifyProof(hashByte, key, proof)
@@ -68,7 +74,7 @@ func TestProofVerificationForNonExistentKey(t *testing.T) {
 func TestProofVerificationForOverwrittenKey(t *testing.T) {
 	t.Parallel()
 
-	db := &mockStorage.MockStorage{}
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 
 	key := []byte("overwriteMe")
@@ -94,7 +100,7 @@ func TestProofVerificationForOverwrittenKey(t *testing.T) {
 func TestProofVerificationAfterDeletion(t *testing.T) {
 	t.Parallel()
 
-	db := &mockStorage.MockStorage{}
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 
 	key := []byte("deleteMe")
@@ -117,7 +123,7 @@ func TestProofVerificationAfterDeletion(t *testing.T) {
 func TestProofVerificationForNonExistentKeyInLeaf(t *testing.T) {
 	t.Parallel()
 
-	db := &mockStorage.MockStorage{}
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 
 	trie.Put([]byte("exists"), []byte("value"))
@@ -133,7 +139,7 @@ func TestProofVerificationForNonExistentKeyInLeaf(t *testing.T) {
 func TestProofVerificationForNonExistentKeyInBranch(t *testing.T) {
 	t.Parallel()
 
-	db := &mockStorage.MockStorage{}
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 
 	keys := [][]byte{
@@ -158,7 +164,7 @@ func TestProofVerificationForNonExistentKeyInBranch(t *testing.T) {
 func TestProofVerificationForNonExistentKeyInExtension(t *testing.T) {
 	t.Parallel()
 
-	db := &mockStorage.MockStorage{}
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 
 	// Assuming that your trie implementation creates an extension node for such keys
@@ -177,12 +183,13 @@ func TestProofVerificationForNonExistentKeyInExtension(t *testing.T) {
 func TestProofVerificationForNonExistentKeyInHash(t *testing.T) {
 	t.Parallel()
 
-	db := &mockStorage.MockStorage{}
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 
 	key := []byte("overwriteMe")
 	value1 := []byte("originalValue")
 	value2 := []byte("newValue")
+
 	trie.Put(key, value1)
 	trie.Put(key, value2) // Overwrite to produce a hash node (assuming large enough data or many writes)
 

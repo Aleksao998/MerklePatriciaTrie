@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"sync"
+
 	"github.com/Aleksao998/Merkle-Patricia-Trie/storage"
 	"github.com/Aleksao998/Merkle-Patricia-Trie/trie/nibble"
 	nodes2 "github.com/Aleksao998/Merkle-Patricia-Trie/trie/nodes"
-	"sync"
 )
 
 var (
@@ -33,6 +34,7 @@ func (t *Trie) Hash() []byte {
 	if t.root == nil {
 		return nil // Empty Trie
 	}
+
 	return t.NodeHash(t.root)
 }
 
@@ -71,7 +73,9 @@ func (t *Trie) Get(key []byte) ([]byte, error) {
 			if err != nil {
 				return nil, err
 			}
+
 			*currentNode = actualNode
+
 			continue
 		case *nodes2.LeafNode:
 			// calculate the length of the common prefix with the leaf node's path
@@ -89,6 +93,7 @@ func (t *Trie) Get(key []byte) ([]byte, error) {
 				if found {
 					return value, nil
 				}
+
 				return nil, errKeyNotFound
 			}
 
@@ -136,11 +141,13 @@ func (t *Trie) Put(key []byte, value []byte) {
 		case nil:
 			// if current node is nil, create a new leaf node with the remaining nibble path and value
 			*currentNode = nodes2.NewLeafNode(nibblePath, value)
+
 			return
 
 		case *nodes2.LeafNode:
 			// handle the logic of inserting a key-value pair when encountering a leaf node
 			t.handleLeafNodeInsert(currentNode, node, nibblePath, value)
+
 			return
 
 		case *nodes2.BranchNode:
@@ -149,6 +156,7 @@ func (t *Trie) Put(key []byte, value []byte) {
 			// if there's no remaining path, set the value directly on the branch node
 			if len(nibblePath) == 0 {
 				node.SetValue(value)
+
 				return
 			}
 			// update the current node to the child pointed by the next nibble and continue to next segment
@@ -163,6 +171,7 @@ func (t *Trie) Put(key []byte, value []byte) {
 			// if they don't share the full extension path, handle the logic of inserting in such scenario
 			if commonLength < len(node.Path) {
 				t.handleExtensionNodeInsert(currentNode, node, nibblePath, value, commonLength)
+
 				return
 			}
 			// move to the next segment of the nibble path and the child node of the extension
@@ -212,6 +221,7 @@ func (t *Trie) Del(key []byte) error {
 	nibblePath := nibble.FromBytes(key)
 	// use pathStack to keep track of nodes for potential path compression later
 	var pathStack []*nodes2.Node
+
 	currentNode := &t.root
 
 	t.getRootHash()
@@ -233,9 +243,12 @@ func (t *Trie) Del(key []byte) error {
 			// if the key matches with the leaf node's path, delete the leaf node
 			if nibble.Equal(node.Path, nibblePath) {
 				*currentNode = nil
+
 				t.compressPath(pathStack)
+
 				return nil
 			}
+
 			return errKeyNotFound
 		case *nodes2.BranchNode:
 			// if there's no remaining path and the branch node has the value, delete the value
@@ -245,12 +258,15 @@ func (t *Trie) Del(key []byte) error {
 				}
 
 				node.ClearValue()
+
 				if node.ChildCount() == 1 {
 					t.compressBranchNode(node, currentNode)
 				}
 
 				node.Dirty = true
+
 				t.compressPath(pathStack)
+
 				return nil
 			}
 			// update the current node and path and keep track of the nodes encountered
@@ -355,11 +371,14 @@ func (t *Trie) getRootHash() {
 		if err != nil {
 			panic(err.Error())
 		}
+
 		t.root = rootNode
 	}
 }
 
 // handleLeafNodeInsert handles the insertion logic when encountering a leaf node in the trie
+//
+//nolint:lll
 func (t *Trie) handleLeafNodeInsert(currentNode *nodes2.Node, leafNode *nodes2.LeafNode, nibblePath []nibble.Nibble, value []byte) {
 	// calculate the length of the common prefix between the leaf node path and the input nibble path
 	commonLength := nibble.CommonPrefixLength(leafNode.Path, nibblePath)
@@ -368,6 +387,7 @@ func (t *Trie) handleLeafNodeInsert(currentNode *nodes2.Node, leafNode *nodes2.L
 	if commonLength == len(nibblePath) && commonLength == len(leafNode.Path) && !bytes.Equal(leafNode.Value, value) {
 		// if they're the same and the values differ, update the current node to the new value
 		*currentNode = nodes2.NewLeafNode(nibblePath, value)
+
 		return
 	}
 
@@ -401,6 +421,8 @@ func (t *Trie) handleLeafNodeInsert(currentNode *nodes2.Node, leafNode *nodes2.L
 }
 
 // handleExtensionNodeInsert handles the insertion logic when encountering an extension node in the trie
+//
+//nolint:lll
 func (t *Trie) handleExtensionNodeInsert(currentNode *nodes2.Node, extNode *nodes2.ExtensionNode, nibblePath []nibble.Nibble, value []byte, commonLength int) {
 	// derive the common nibbles, the branching nibble, and the remaining nibbles from the extension node's path
 	extNibbles := extNode.Path[:commonLength]

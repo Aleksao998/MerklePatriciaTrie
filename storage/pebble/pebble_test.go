@@ -22,6 +22,7 @@ func createPebbleStorage() (string, *Storage, error) {
 	store, err := NewStorage(tempDir)
 	if err != nil {
 		os.RemoveAll(tempDir)
+
 		return "", nil, fmt.Errorf("error creating new Pebble storage: %w", err)
 	}
 

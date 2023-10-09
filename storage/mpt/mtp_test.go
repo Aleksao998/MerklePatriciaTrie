@@ -1,8 +1,9 @@
 package mpt
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMPTMemoryStorage_Has_NonExistentKey(t *testing.T) {

@@ -5,6 +5,7 @@ type Nibble byte
 // FromBytes converts a byte slice to a slice of Nibbles.
 func FromBytes(bytes []byte) []Nibble {
 	nibbles := make([]Nibble, len(bytes)*2)
+
 	for i, b := range bytes {
 		high, low := b>>4, b&0x0F
 		nibbles[i*2] = Nibble(high)
@@ -35,11 +36,13 @@ func Equal(n1, n2 []Nibble) bool {
 	if len(n1) != len(n2) {
 		return false
 	}
+
 	for i, v := range n1 {
 		if v != n2[i] {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -80,6 +83,7 @@ func ToBytes(ns []Nibble) []byte {
 // IsLeaf checks if the compact-encoded path is of a leaf node
 func IsLeaf(encodedPath []Nibble) bool {
 	firstNibble := encodedPath[0]
+
 	return firstNibble == 2 || firstNibble == 3
 }
 

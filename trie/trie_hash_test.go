@@ -2,10 +2,11 @@ package trie
 
 import (
 	"bytes"
-	"github.com/Aleksao998/Merkle-Patricia-Trie/storage/mockStorage"
+	"testing"
+
+	mockstorage "github.com/Aleksao998/Merkle-Patricia-Trie/storage/mockStorage"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 // TestInsert tests the insertion of various nodes into the Merkle Patricia Trie (MPT)
@@ -15,7 +16,8 @@ import (
 // accurate and consistent with established implementations.
 func TestInsert(t *testing.T) {
 	t.Parallel()
-	db := &mockStorage.MockStorage{}
+
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 
 	trie.Put([]byte("doe"), []byte("reindeer"))
@@ -43,7 +45,7 @@ func TestInsert(t *testing.T) {
 func TestDelete(t *testing.T) {
 	t.Parallel()
 
-	db := &mockStorage.MockStorage{}
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 	trie.Put([]byte("doe"), []byte("reindeer"))
 	trie.Put([]byte("dog"), []byte("puppy"))
@@ -71,10 +73,11 @@ func TestEmptyTree(t *testing.T) {
 	t.Skip()
 	t.Parallel()
 
-	db := &mockStorage.MockStorage{}
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 
 	exp := common.HexToHash("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421")
+
 	root := trie.Hash()
 	if !bytes.Equal(root, exp.Bytes()) {
 		t.Errorf("case 1: exp %x got %x", exp, root)
@@ -85,7 +88,7 @@ func TestEmptyTree(t *testing.T) {
 func TestSameTries(t *testing.T) {
 	t.Parallel()
 
-	db := &mockStorage.MockStorage{}
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 	copyTrie := NewTrie(db)
 

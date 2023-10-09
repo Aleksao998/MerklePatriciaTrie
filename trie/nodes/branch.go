@@ -31,6 +31,7 @@ func (b *BranchNode) GetValue() (value []byte, exists bool) {
 	if b.Value != nil {
 		return b.Value, true
 	}
+
 	return nil, false
 }
 
@@ -48,11 +49,13 @@ func (b *BranchNode) SetChild(nibble nibble.Nibble, node Node) {
 // ChildCount returns the number of children the branch node has (i.e., non-nil children)
 func (b *BranchNode) ChildCount() int {
 	total := 0
+
 	for _, child := range b.Children {
 		if child != nil {
 			total++
 		}
 	}
+
 	return total
 }
 

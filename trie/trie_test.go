@@ -1,11 +1,12 @@
 package trie
 
 import (
-	"github.com/Aleksao998/Merkle-Patricia-Trie/storage/mockStorage"
-	"github.com/stretchr/testify/require"
 	"strconv"
 	"sync"
 	"testing"
+
+	mockstorage "github.com/Aleksao998/Merkle-Patricia-Trie/storage/mockStorage"
+	"github.com/stretchr/testify/require"
 )
 
 // TestGetPutDelBasic tests basic trie instructions
@@ -15,7 +16,7 @@ func TestGetPutDelBasic(t *testing.T) {
 	t.Run("should get an error if key does not exists", func(t *testing.T) {
 		t.Parallel()
 
-		db := &mockStorage.MockStorage{}
+		db := &mockstorage.MockStorage{}
 		trie := NewTrie(db)
 
 		_, err := trie.Get([]byte("notexist"))
@@ -28,7 +29,7 @@ func TestGetPutDelBasic(t *testing.T) {
 	t.Run("should get an value if key exists", func(t *testing.T) {
 		t.Parallel()
 
-		db := &mockStorage.MockStorage{}
+		db := &mockstorage.MockStorage{}
 		trie := NewTrie(db)
 
 		trie.Put([]byte("key"), []byte("value"))
@@ -41,7 +42,7 @@ func TestGetPutDelBasic(t *testing.T) {
 	t.Run("should get an error if we try to get deleted item", func(t *testing.T) {
 		t.Parallel()
 
-		db := &mockStorage.MockStorage{}
+		db := &mockstorage.MockStorage{}
 		trie := NewTrie(db)
 
 		trie.Put([]byte("key"), []byte("value"))
@@ -54,7 +55,7 @@ func TestGetPutDelBasic(t *testing.T) {
 	t.Run("should get latest value on updated items", func(t *testing.T) {
 		t.Parallel()
 
-		db := &mockStorage.MockStorage{}
+		db := &mockstorage.MockStorage{}
 		trie := NewTrie(db)
 
 		trie.Put([]byte("key"), []byte("value"))
@@ -82,7 +83,7 @@ func TestGetPutMultipleItems(t *testing.T) {
 		{key: []byte("car"), value: []byte("car")},
 	}
 
-	db := &mockStorage.MockStorage{}
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 
 	// put items
@@ -100,7 +101,7 @@ func TestGetPutMultipleItems(t *testing.T) {
 
 // TestTrieConcurrencyBasic tests adding, retrieving and deleting item in parallel
 func TestTrieConcurrencyBasic(t *testing.T) {
-	db := &mockStorage.MockStorage{}
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 
 	// use WaitGroup to synchronize our go routines
@@ -109,8 +110,10 @@ func TestTrieConcurrencyBasic(t *testing.T) {
 	// launch multiple goroutines to write data to the trie
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
+
 		go func(i int) {
 			defer wg.Done()
+
 			key := "key" + strconv.Itoa(i)
 			value := "value" + strconv.Itoa(i)
 			trie.Put([]byte(key), []byte(value))
@@ -123,12 +126,17 @@ func TestTrieConcurrencyBasic(t *testing.T) {
 	// launch multiple goroutines to read data from the trie
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
+
 		go func(i int) {
 			defer wg.Done()
+
 			key := "key" + strconv.Itoa(i)
+
 			value, err := trie.Get([]byte(key))
 			require.NoError(t, err, "Error reading key %s", key)
+
 			expectedValue := "value" + strconv.Itoa(i)
+
 			require.Equal(t, expectedValue, string(value), "Expected value for key %s", key)
 		}(i)
 	}
@@ -139,8 +147,10 @@ func TestTrieConcurrencyBasic(t *testing.T) {
 	// launch multiple goroutines to read data from the trie
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
+
 		go func(i int) {
 			defer wg.Done()
+
 			key := "key" + strconv.Itoa(i)
 			err := trie.Del([]byte(key))
 			require.NoError(t, err, "Error deleting key %s", key)
@@ -153,7 +163,7 @@ func TestTrieConcurrencyBasic(t *testing.T) {
 
 // TestTrieConcurrencyAdvance tests getting and putting items in parallel
 func TestTrieConcurrencyAdvance(t *testing.T) {
-	db := &mockStorage.MockStorage{}
+	db := &mockstorage.MockStorage{}
 	trie := NewTrie(db)
 
 	// use WaitGroup to synchronize our go routines
@@ -162,8 +172,10 @@ func TestTrieConcurrencyAdvance(t *testing.T) {
 	// launch multiple goroutines to write initial data to the trie
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
+
 		go func(i int) {
 			defer wg.Done()
+
 			key := "key" + strconv.Itoa(i)
 			value := "value" + strconv.Itoa(i)
 			trie.Put([]byte(key), []byte(value))
@@ -175,22 +187,30 @@ func TestTrieConcurrencyAdvance(t *testing.T) {
 
 	// launch multiple goroutines to concurrently read old items and add new items with an offset
 	offset := 1000
+
 	for i := 0; i < 1000; i++ {
 		// retrieve old items
 		wg.Add(1)
+
 		go func(i int) {
 			defer wg.Done()
+
 			key := "key" + strconv.Itoa(i)
+
 			value, err := trie.Get([]byte(key))
 			require.NoError(t, err, "Error reading key %s", key)
+
 			expectedValue := "value" + strconv.Itoa(i)
+
 			require.Equal(t, expectedValue, string(value), "Expected value for key %s", key)
 		}(i)
 
 		// insert new items with offset
 		wg.Add(1)
+
 		go func(i int) {
 			defer wg.Done()
+
 			key := "key" + strconv.Itoa(i+offset) // Using offset for new keys
 			value := "value" + strconv.Itoa(i+offset)
 			trie.Put([]byte(key), []byte(value))
@@ -203,12 +223,17 @@ func TestTrieConcurrencyAdvance(t *testing.T) {
 	// launch multiple goroutines to read the new items added with offset
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
+
 		go func(i int) {
 			defer wg.Done()
+
 			key := "key" + strconv.Itoa(i+offset)
+
 			value, err := trie.Get([]byte(key))
 			require.NoError(t, err, "Error reading new key %s", key)
+
 			expectedValue := "value" + strconv.Itoa(i+offset)
+
 			require.Equal(t, expectedValue, string(value), "Expected value for new key %s", key)
 		}(i)
 	}

@@ -1,12 +1,14 @@
+//nolint:forcetypeassert
 package trie
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/Aleksao998/Merkle-Patricia-Trie/storage/mpt"
 	"github.com/Aleksao998/Merkle-Patricia-Trie/trie/nibble"
 	nodes2 "github.com/Aleksao998/Merkle-Patricia-Trie/trie/nodes"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestCommitter_SingleLeafNode(t *testing.T) {
@@ -29,7 +31,11 @@ func TestCommitter_SingleLeafNode(t *testing.T) {
 	assert.NoError(t, err, "Failed to decode node")
 
 	// Compare the original and decoded nodes
-	decodedLeaf := decodedNode.(*nodes2.LeafNode)
+	decodedLeaf, ok := decodedNode.(*nodes2.LeafNode)
+	if !ok {
+		t.Fatalf("expected decodedNode to be *nodes2.LeafNode, got %T", decodedNode)
+	}
+
 	assert.Equal(t, leaf.Path, decodedLeaf.Path, "Leaf path mismatch")
 	assert.Equal(t, leaf.Value, decodedLeaf.Value, "Leaf value mismatch")
 }
@@ -59,7 +65,11 @@ func TestCommitter_ExtensionAndBranchNodes(t *testing.T) {
 	assert.NoError(t, err, "Failed to decode node")
 
 	// Compare original and decoded structures
-	decodedExt := decodedNode.(*nodes2.ExtensionNode)
+	decodedExt, ok := decodedNode.(*nodes2.ExtensionNode)
+	if !ok {
+		t.Fatalf("expected decodedNode to be *nodes2.ExtensionNode, got %T", decodedNode)
+	}
+
 	assert.Equal(t, ext.Path, decodedExt.Path, "Extension path mismatch")
 
 	// Fetch branch node if it's a HashNode
@@ -68,16 +78,22 @@ func TestCommitter_ExtensionAndBranchNodes(t *testing.T) {
 		assert.NoError(t, err, "Failed to decode hash node")
 	}
 
-	decodedBranch := decodedExt.Node.(*nodes2.BranchNode)
+	decodedBranch, ok := decodedExt.Node.(*nodes2.BranchNode)
+	if !ok {
+		t.Fatalf("expected decodedExt.Node to be *nodes2.BranchNode, got %T", decodedExt.Node)
+	}
 
 	// Fetch child nodes if they are HashNodes, then compare
 	for i, child := range decodedBranch.Children {
 		if child == nil {
 			continue
 		}
+
 		if hashNode, ok := child.(*nodes2.HashNode); ok {
 			decodedChild, err := trie.DecodeNode(hashNode.Hash)
+
 			assert.NoError(t, err, fmt.Sprintf("Failed to decode child node at index %d", i))
+
 			decodedBranch.Children[i] = decodedChild
 		}
 	}

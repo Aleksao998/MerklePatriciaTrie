@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/trie"
 	"math/rand"
 	"os"
+
+	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/ethereum/go-ethereum/trie"
 )
 
 const (
@@ -34,13 +35,18 @@ type Example struct {
 
 func randomString() string {
 	// generate a random length between 1 and 10
+	// #nosec G404
 	n := rand.Intn(10) + 1
 
 	letters := []rune("abcdefghijklmnopqrstuvwxyz")
+
 	b := make([]rune, n)
+
 	for i := range b {
+		// #nosec G404
 		b[i] = letters[rand.Intn(len(letters))]
 	}
+
 	return string(b)
 }
 
@@ -57,11 +63,13 @@ func generateExamples() []Example {
 
 	for i := 0; i < NumExamples; i++ {
 		tr := trie.NewEmpty(trie.NewDatabase(rawdb.NewMemoryDatabase(), nil))
+		// #nosec G404
 		numActions := rand.Intn(MaxActions) + 1
 		actions := make([]Action, numActions)
 
 		for j := 0; j < numActions; j++ {
 			actionType := Add
+			// #nosec G404
 			if j > 0 && rand.Float32() > 0.5 {
 				actionType = Delete
 			}
@@ -78,28 +86,35 @@ func generateExamples() []Example {
 				deleteString(tr, action.Key)
 				action.Value = ""
 			}
+
 			actions[j] = action
 		}
 
 		rootHash := tr.Hash().String()
 		examples[i] = Example{Actions: actions, Root: rootHash}
 	}
+
 	return examples
 }
 
 func main() {
 	examples := generateExamples()
+
 	file, err := os.Create("../tests/examples.json")
 	if err != nil {
 		fmt.Println("Error:", err)
+
 		return
 	}
+
 	defer file.Close()
 
 	encoder := json.NewEncoder(file)
+
 	err = encoder.Encode(examples)
 	if err != nil {
 		fmt.Println("Error:", err)
+
 		return
 	}
 }

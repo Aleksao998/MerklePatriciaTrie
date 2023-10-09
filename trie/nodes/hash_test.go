@@ -1,8 +1,9 @@
 package nodes
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // TestNewHashNode_Basic tests the basic creation of a HashNode with given hash.

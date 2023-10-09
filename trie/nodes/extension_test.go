@@ -1,9 +1,10 @@
 package nodes
 
 import (
+	"testing"
+
 	"github.com/Aleksao998/Merkle-Patricia-Trie/trie/nibble"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 // TestNewExtension_Basic tests the creation of an ExtensionNode and its properties.

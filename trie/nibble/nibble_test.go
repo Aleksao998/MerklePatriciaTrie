@@ -1,14 +1,13 @@
 package nibble
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // TestFromBytes tests converting byte array to nibble array
 func TestFromBytes(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name    string
 		bytes   []byte
@@ -22,7 +21,6 @@ func TestFromBytes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			nibbles := FromBytes(tt.bytes)
 			for i, nibble := range nibbles {
 				assert.Equal(t, tt.nibbles[i], nibble)
@@ -33,8 +31,6 @@ func TestFromBytes(t *testing.T) {
 
 // TestCommonPrefixLength tests the length of the common prefix shared between two slices of Nibbles
 func TestCommonPrefixLength(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name           string
 		node1          []Nibble
@@ -49,7 +45,6 @@ func TestCommonPrefixLength(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			length := CommonPrefixLength(tt.node1, tt.node2)
 			assert.Equal(t, tt.expectedLength, length)
 		})
@@ -58,8 +53,6 @@ func TestCommonPrefixLength(t *testing.T) {
 
 // TestEqual tests if two slices of Nibbles are equal
 func TestEqual(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name     string
 		node1    []Nibble
@@ -77,7 +70,6 @@ func TestEqual(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			result := Equal(tt.node1, tt.node2)
 			assert.Equal(t, tt.expected, result)
 		})
@@ -86,8 +78,6 @@ func TestEqual(t *testing.T) {
 
 // TestCompactEncoding tests the CompactEncoding function
 func TestCompactEncoding(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name       string
 		ns         []Nibble
@@ -106,7 +96,6 @@ func TestCompactEncoding(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			result := CompactEncoding(tt.ns, tt.isLeafNode)
 			assert.Equal(t, tt.expected, result)
 		})
@@ -115,8 +104,6 @@ func TestCompactEncoding(t *testing.T) {
 
 // TestToBytes tests the ToBytes function
 func TestToBytes(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name     string
 		ns       []Nibble
@@ -129,7 +116,6 @@ func TestToBytes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			result := ToBytes(tt.ns)
 			assert.Equal(t, tt.expected, result)
 		})
@@ -138,8 +124,6 @@ func TestToBytes(t *testing.T) {
 
 // TestIsLeaf tests the IsLeaf function
 func TestIsLeaf(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name     string
 		ns       []Nibble
@@ -154,7 +138,6 @@ func TestIsLeaf(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			result := IsLeaf(tt.ns)
 			assert.Equal(t, tt.expected, result)
 		})
@@ -163,8 +146,6 @@ func TestIsLeaf(t *testing.T) {
 
 // TestRemoveCompactEncoding tests the RemoveCompactEncoding function
 func TestRemoveCompactEncoding(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name     string
 		ns       []Nibble
@@ -183,7 +164,6 @@ func TestRemoveCompactEncoding(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			result := RemoveCompactEncoding(tt.ns)
 			assert.Equal(t, tt.expected, result)
 		})
