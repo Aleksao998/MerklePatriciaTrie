@@ -1,6 +1,6 @@
-<h1 align="center">🌴 MerklePatriciaTree</h1>
+<h1 align="center">🌴 MerklePatriciaTrie</h1>
 
-MerklePatriciaTree is an efficient and robust implementation of the trie data structure in Go. This trie is tailored for Ethereum-like systems but can be used in a variety of applications where data integrity, proof generation, and optimized storage are crucial.
+MerklePatriciaTrie is an efficient and robust implementation of the trie data structure in Go. This trie is tailored for Ethereum-like systems but can be used in a variety of applications where data integrity, proof generation, and optimized storage are crucial.
 
 ## ⚠️ Disclaimer
 1. **Not Production Ready:** This codebase is still in its development phase and should not be considered production-ready.
@@ -24,4 +24,4 @@ Our trie supports various operations, like:
 6. **Del:** To delete a key-value pair from the trie.
 
 ## 📚 Resources & Documentation
-[Official Documentation](https://gotolabs.gitbook.io/merklepatriciatree/)
+[Official Documentation](https://gotolabs.gitbook.io/merklepatriciatrie/)
